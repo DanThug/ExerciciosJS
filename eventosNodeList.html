@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+        <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+<style>
+        #conteudo {
+            font-family: Arial, Helvetica, sans-serif;
+            margin: auto;
+            width: 40%;
+        }
+        #listaTarefas {
+            list-style: none;
+            margin-left: 0;
+            padding-left: 0;
+            width: auto;
+        }
+        .descricaoTarefa {
+            background-color: AliceBlue;
+        }
+        #infoAlerta {
+            display: none;
+        }
+        input[type=checkbox] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+    <title>Document</title>
+</head>
+<body>
+    <div id="conteudo">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title"><span class="glyphicon glyphicon-list-alt" aria-hidden="true"></span> Minhas Tarefas</h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list group" id="listaTarefas">
+                    <li class="list-group-item descricaoTarefa"><input type="checkbox" class="checkboxTarefa">Arrumar o quarto</li>
+                    <li class="list-group-item descricaoTarefa"><input type="checkbox" class="checkboxTarefa">Varrer a casa</li>
+                    <li class="list-group-item descricaoTarefa"><input type="checkbox" class="checkboxTarefa">Passear com o cachorro</li>
+                </ul>
+                <div class="alert alert-info" role="alert">
+                    <strong>Total de Tarefas: </strong><span id="totalTarefas"></span>
+                </div>
+                <div class="alert alert-danger" id="infoAlerta" role="alert">
+                    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                    <span id="info">Tarefa vazia ou já cadastrada!</span>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="novaTarefa" placeholder="Informe sua nova tarefa" autofocus>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-success btn-block" id="adicionarNovaTarefa"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Adicionar Tarefa</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-danger btn-block" id="excluirTarefa"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Excluir Tarefa</button>
+                    </div>
+                </div><!----- row ------>
+            </div>
+        </div><!------- panel ------>
+    </div><!----- conteudo ------->
+
+    <script>
+        (function(){
+            const descricaoTarefa = document.getElementsByClassName("descricaoTarefa");
+            const adicionarNovaTarefa = document.getElementById("adicionarNovaTarefa");
+            const excluirTarefa = document.getElementById("excluirTarefa");
+            const novaTarefa = document.getElementById("novaTarefa");
+            const checkboxTarefa = document.getElementsByClassName("checkboxTarefa");
+            const listaTarefas = document.getElementById("listaTarefas");
+            const Info = document.getElementById("info");
+            const totalTarefas = document.getElementById("totalTarefas");
+            minhasTarefas();
+
+            novaTarefa.addEventListener('keyup', ev => {
+                if( ev.keyCode === 13 ){
+                    adicionar();
+                }
+            });
+
+            adicionarNovaTarefa.addEventListener("click", adicionar);
+            excluirTarefa.addEventListener("click", excluir);
+
+            function excluir(){
+                for(let i = 0; i < checkboxTarefa.length; i++){
+                    if( checkboxTarefa[i].checked ){
+                        //console.log(descricaoTarefa[i].remove(this));
+                        descricaoTarefa[i].remove(this);
+                        minhasTarefas();
+                        novaTarefa.focus();
+                    }
+                }
+            }
+
+            function adicionar(){
+                if( tarefaDuplicada() || novaTarefa.value === '' ){
+                    info.parentNode.style.display = "block";
+                    novaTarefa.focus();
+                }else{
+                    info.parentNode.style.display = "none";
+                    listaTarefas.appendChild( criarLi() );
+                    novaTarefa.value = '';
+                    novaTarefa.focus();
+                }
+                minhasTarefas();
+            }
+
+            listaTarefas.addEventListener('input', () => {
+                for(let i = 0; i < descricaoTarefa.length; i++){
+                    checkboxTarefa[i].addEventListener("change", ev => {
+                        ev.target.checked ? ev.target.parentNode.style.backgroundColor = 'LightGreen' : ev.target.parentNode.style.backgroundColor = '';
+                    });
+                }
+            });
+
+            function tarefaDuplicada(){
+                let arrayTarefas = [];
+                let retorno;
+                for(let i = 0; i < descricaoTarefa.length; i++){
+                    arrayTarefas.push(descricaoTarefa[i].textContent);
+                }
+                arrayTarefas.includes(novaTarefa.value) ? retorno = true : retorno = false;
+                return retorno;
+            }
+
+            function criarLi(){      
+                const tarefa = document.createElement("LI");   
+                tarefa.setAttribute('class', 'list-group-item descricaoTarefa');
+                tarefa.append( criarCheckbox() );
+                tarefa.append( novaTarefa.value );
+                return tarefa;
+            }
+
+            function criarCheckbox(){
+                const checkbox = document.createElement("INPUT");
+                checkbox.setAttribute('type', 'checkbox');
+                checkbox.setAttribute('class', 'checkboxTarefa');
+                return checkbox;
+            }
+
+            function minhasTarefas(){
+                return totalTarefas.textContent = descricaoTarefa.length;
+            }
+        })();
+    </script>
+</body>
+</html>
