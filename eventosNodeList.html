@@ -60,10 +60,10 @@
                         <input type="text" class="form-control" id="novaTarefa" placeholder="Informe sua nova tarefa" autofocus>
                     </div>
                     <div class="col-md-3">
-                        <button type="button" class="btn btn-success btn-block" id="adicionarNovaTarefa"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Adicionar Tarefa</button>
+                        <button type="button" class="btn btn-success btn-block" id="btnNovaTarefa"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Nova Tarefa</button>
                     </div>
                     <div class="col-md-3">
-                        <button type="button" class="btn btn-danger btn-block" id="excluirTarefa"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Excluir Tarefa</button>
+                        <button type="button" class="btn btn-danger btn-block" id="btnExcluirTarefa"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Excluir Tarefa</button>
                     </div>
                 </div><!----- row ------>
             </div>
@@ -73,64 +73,61 @@
     <script>
         (function(){
             const descricaoTarefa = document.getElementsByClassName("descricaoTarefa");
-            const adicionarNovaTarefa = document.getElementById("adicionarNovaTarefa");
-            const excluirTarefa = document.getElementById("excluirTarefa");
+            const btnNovaTarefa = document.getElementById("btnNovaTarefa");
+            const btnExcluirTarefa = document.getElementById("btnExcluirTarefa");
             const novaTarefa = document.getElementById("novaTarefa");
             const checkboxTarefa = document.getElementsByClassName("checkboxTarefa");
             const listaTarefas = document.getElementById("listaTarefas");
             const Info = document.getElementById("info");
-            const totalTarefas = document.getElementById("totalTarefas");
-            minhasTarefas();
+            
+            exibirTotalDeTarefas();
+            btnNovaTarefa.addEventListener("click", verificarTarefa);
+            btnExcluirTarefa.addEventListener("click", excluirTarefa);
 
+            //Se for pressionado ENTER
             novaTarefa.addEventListener('keyup', ev => {
                 if( ev.keyCode === 13 ){
-                    adicionar();
+                    verificarTarefa();
                 }
             });
 
-            adicionarNovaTarefa.addEventListener("click", adicionar);
-            excluirTarefa.addEventListener("click", excluir);
-
-            function excluir(){
-                for(let i = 0; i < checkboxTarefa.length; i++){
+            //Remove as tarefas selecionadas
+            function excluirTarefa(){
+                for(let i = listaTarefas.childElementCount - 1; i >= 0; i--){
                     if( checkboxTarefa[i].checked ){
-                        //console.log(descricaoTarefa[i].remove(this));
-                        descricaoTarefa[i].remove(this);
-                        minhasTarefas();
-                        novaTarefa.focus();
+                        listaTarefas.removeChild(listaTarefas.children[i]);
                     }
                 }
+                exibirTotalDeTarefas();
+                novaTarefa.focus();
             }
 
-            function adicionar(){
-                if( tarefaDuplicada() || novaTarefa.value === '' ){
-                    info.parentNode.style.display = "block";
-                    novaTarefa.focus();
-                }else{
-                    info.parentNode.style.display = "none";
-                    listaTarefas.appendChild( criarLi() );
-                    novaTarefa.value = '';
-                    novaTarefa.focus();
-                }
-                minhasTarefas();
+            //adiciona a LI e a tarefa
+            function adicionarTarefa(){
+                info.parentNode.style.display = "none";
+                listaTarefas.appendChild( criarLi() );
+                novaTarefa.value = '';
+                novaTarefa.focus();
+                exibirTotalDeTarefas();
             }
 
-            listaTarefas.addEventListener('input', () => {
-                for(let i = 0; i < descricaoTarefa.length; i++){
-                    checkboxTarefa[i].addEventListener("change", ev => {
-                        ev.target.checked ? ev.target.parentNode.style.backgroundColor = 'LightGreen' : ev.target.parentNode.style.backgroundColor = '';
-                    });
-                }
+            //Ao clicar no checkbox, a tarefa fica verde
+            listaTarefas.addEventListener('click', e => {
+                e.target.checked ? e.target.parentNode.style.backgroundColor = 'LightGreen' : e.target.parentNode.style.backgroundColor = '';
             });
 
-            function tarefaDuplicada(){
+            //Vai verificar se a tarefa já existe ou se o campo está em branco
+            function verificarTarefa(){
                 let arrayTarefas = [];
-                let retorno;
                 for(let i = 0; i < descricaoTarefa.length; i++){
                     arrayTarefas.push(descricaoTarefa[i].textContent);
                 }
-                arrayTarefas.includes(novaTarefa.value) ? retorno = true : retorno = false;
-                return retorno;
+                if(arrayTarefas.includes(novaTarefa.value) || novaTarefa.value === ''){
+                    info.parentNode.style.display = "block";
+                    novaTarefa.focus();
+                }else{
+                    adicionarTarefa();
+                }
             }
 
             function criarLi(){      
@@ -148,7 +145,8 @@
                 return checkbox;
             }
 
-            function minhasTarefas(){
+            function exibirTotalDeTarefas(){
+                const totalTarefas = document.getElementById("totalTarefas");
                 return totalTarefas.textContent = descricaoTarefa.length;
             }
         })();
